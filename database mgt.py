@@ -40,6 +40,14 @@ with open("/Users/user/Documents/Keele AI & DS/CSC-40054 (Data Analytics and Dat
         # insert data into the table CarSharing.
         cur.execute("INSERT INTO CarSharing VALUES (?,?,?,?,?,?,?,?,?,?,?)", row)
 
+# Fetch and print the data in the table
+print("\nQ1: CarSharing table (top 5 rows)")
+cur.execute("SELECT * FROM CarSharing LIMIT 5")
+CarSharing = cur.fetchall()
+
+for row in CarSharing:
+    print({row})
+
 # 1b.
 # Create a backup table and copy the whole table into it.
 
@@ -48,6 +56,14 @@ CREATE TABLE CarSharing_backup AS
 SELECT * 
 FROM CarSharing
 ''')
+
+# Fetch and print the data in the table
+print("\nQ1: CarSharing back-up table (top 5 rows)")
+cur.execute("SELECT * FROM CarSharing_backup LIMIT 5")
+CarSharing_backup = cur.fetchall()
+
+for row in CarSharing_backup:
+    print({row})
 
 # 2a.
 # Add a column to the CarSharing table named "temp_category".
@@ -65,6 +81,14 @@ cur.execute('''
         END
     )
 ''')
+
+# Fetch and print the data in the table
+print("\nQ2: CarSharing updated table (top 5 rows)")
+cur.execute("SELECT * FROM CarSharing LIMIT 5")
+CarSharing = cur.fetchall()
+
+for row in CarSharing:
+    print({row})
 
 # 3a.
 # Create another table named "temperature" featuring temp, temp_feel and temp_category columns.
@@ -85,6 +109,14 @@ cur.execute('''
     FROM CarSharing
 ''')
 
+# Fetch and print the data in the table
+print("\nQ3: Temperature table (top 5 rows)")
+cur.execute("SELECT * FROM temperature LIMIT 5")
+temperature = cur.fetchall()
+
+for row in temperature:
+    print({row})
+
 # 3b.
 # Drop the temp and temp_feel columns from the CarSharing table using the executescript() method
 # of the cursor object.
@@ -100,6 +132,14 @@ DROP COLUMN temp_feel;
 COMMIT;
 ''')
 
+# Fetch and print the data in the table
+print("\nQ3: Temperature table altered (top 5 rows)")
+cur.execute("SELECT * FROM temperature LIMIT 5")
+temperature = cur.fetchall()
+
+for row in temperature:
+    print({row})
+
 # 4a.
 # Find the distinct values of the weather column
 cur.execute("SELECT DISTINCT weather FROM CarSharing")
@@ -108,6 +148,7 @@ cur.execute("SELECT DISTINCT weather FROM CarSharing")
 distinct_weather = cur.fetchall()
 
 # Print the distinct values.
+print("\nQ4: Distinct weather of the weather column")
 for row in distinct_weather:
     print(row[0])
 
@@ -131,7 +172,7 @@ for weather, code in weather_code.items():
     WHERE weather = ?;
     ''', (code, weather))
 
-# Query the top 5 rows from the CarSharing table to have an idea of how the table looks like
+# Query the top 5 rows from the CarSharing table.
 cur.execute('''
 SELECT * 
 FROM CarSharing 
@@ -139,15 +180,17 @@ LIMIT 5;
 ''')
 
 # Fetch and print the data
+print("\nQ4: CarSharing table updated with weather_code")
 rows = cur.fetchall()
 for row in rows:
     print(row)
 
-# Query the column information for the CarSharing table to confirm the newly added columns
+# Alternatively, query the column information for the CarSharing table to confirm the newly added columns
 cur.execute("PRAGMA table_info(CarSharing)")
 
 # Fetch and print the column names
 columns = cur.fetchall()
+print("\nQ4: Column details of the updated CarSharing table")
 for column in columns:
     print(f"{column[0]}: {column[1]}: {column[2]}")
 
@@ -178,6 +221,7 @@ cur.execute("PRAGMA table_info(CarSharing)")
 
 # Fetch and print the column names
 columns = cur.fetchall()
+print("\nQ5: Column details of the altered CarSharing table")
 for column in columns:
     print(f"{column[0]}: {column[1]}: {column[2]}")
 
@@ -232,6 +276,7 @@ LIMIT 5;
 
 # Fetch and print the data.
 rows = cur.fetchall()
+print("\nQ6: 'time' table with the four columns; timestamp, hour, weekday and month ")
 for row in rows:
     print(row)
 
@@ -249,7 +294,7 @@ LIMIT 1;
 
 # Fetch and print the result.
 result = cur.fetchone()
-print(f"The date and time with the highest demand rate in 2017 was {result[0]} with a demand rate of {result[1]}.")
+print(f"\nQ7a:\nThe date and time with the highest demand rate in 2017 was {result[0]} with a demand rate of {result[1]}.")
 
 # 7b.
 # Provide a table containing the name of the weekday, month and season
@@ -360,6 +405,7 @@ cur.executescript(query_highest_demand2017)
 # Fetch and print the data.
 cur.execute("SELECT * FROM highest_demand2017")
 highest_demand2017 = cur.fetchall()
+print("\nQ7b: The highest demand rate in 2017 ")
 for row in highest_demand2017:
     print(row)
 
@@ -370,6 +416,7 @@ cur.executescript(query_lowest_demand2017)
 # Fetch and print the data.
 cur.execute("SELECT * FROM lowest_demand2017")
 lowest_demand2017 = cur.fetchall()
+print("\nQ7b: The lowest demand rate in 2017 ")
 for row in lowest_demand2017:
     print(row)
 
@@ -380,25 +427,29 @@ for row in lowest_demand2017:
 # Firstly, fetch the weekday of the highest demand rate throughout 2017.
 cur.execute("SELECT weekday FROM highest_demand2017")
 highest_weekday = cur.fetchone()
+print("\nQ7c: Weekday with highest demand rate in 2017 ")
 for row in highest_weekday:
     print(row)
 
 # Then, create the table to show the average demand rate for different hours of the weekday
+highest_weekday = '0'
 cur.execute("""
 CREATE TABLE hour_highest_demand AS
 SELECT strftime('%H', timestamp) AS hour,
-AVG(demand) AS avg_demand,
+       AVG(demand) AS avg_demand,
+       CASE strftime('%w', timestamp)
+           WHEN '0' THEN 'Sunday'
+           WHEN '1' THEN 'Monday'
+           WHEN '2' THEN 'Tuesday'
+           WHEN '3' THEN 'Wednesday'
+           WHEN '4' THEN 'Thursday'
+           WHEN '5' THEN 'Friday'
+           WHEN '6' THEN 'Saturday'
+       END AS weekday
 FROM CarSharing
 WHERE strftime('%Y', timestamp) LIKE '2017%'
-AND strftime('%w', timestamp) = ?
-    WHEN '0' THEN 'Sunday'
-    WHEN '1' THEN 'Monday'
-    WHEN '2' THEN 'Tuesday'
-    WHEN '3' THEN 'Wednesday'
-    WHEN '4' THEN 'Thursday'
-    WHEN '5' THEN 'Friday'
-    WHEN '6' THEN 'Saturday'
-GROUP BY hour
+    AND strftime('%w', timestamp) = ?
+GROUP BY hour, weekday
 ORDER BY avg_demand DESC
 """, highest_weekday,)
 
@@ -406,6 +457,7 @@ ORDER BY avg_demand DESC
 cur.execute("SELECT * FROM hour_highest_demand")
 hour_highest_demand = cur.fetchall()
 
+print("\nQ7c: Hours and average demand from weekday with highest demand rate in 2017")
 for row in hour_highest_demand:
     hour = row[0]
     avg_demand = row[1]
@@ -418,51 +470,192 @@ for row in hour_highest_demand:
 # Fetch the weekday of the lowest demand rate throughout 2017.
 cur.execute("SELECT weekday FROM lowest_demand2017")
 lowest_weekday = cur.fetchone()
+print("\nQ7c: Weekday with lowest demand rate in 2017 ")
 for row in lowest_weekday:
     print(row)
 
 # Then, create the table to show the average demand rate for different hours of the weekday
+lowest_weekday = '1'
 cur.execute("""
 CREATE TABLE hour_lowest_demand AS
-SELECT strftime('%H', timestamp) AS hour, 
-AVG(demand) AS avg_demand
+SELECT strftime('%H', timestamp) AS hour,
+       AVG(demand) AS avg_demand,
+       CASE strftime('%w', timestamp)
+           WHEN '0' THEN 'Sunday'
+           WHEN '1' THEN 'Monday'
+           WHEN '2' THEN 'Tuesday'
+           WHEN '3' THEN 'Wednesday'
+           WHEN '4' THEN 'Thursday'
+           WHEN '5' THEN 'Friday'
+           WHEN '6' THEN 'Saturday'
+       END AS weekday
 FROM CarSharing
-WHERE strftime('%Y', timestamp) LIKE '2017%' 
-AND strftime('%w', timestamp) = ?
-    WHEN '0' THEN 'Sunday'
-    WHEN '1' THEN 'Monday'
-    WHEN '2' THEN 'Tuesday'
-    WHEN '3' THEN 'Wednesday'
-    WHEN '4' THEN 'Thursday'
-    WHEN '5' THEN 'Friday'
-    WHEN '6' THEN 'Saturday'
-GROUP BY hour
-ORDER BY avg_demand ASC
+WHERE strftime('%Y', timestamp) LIKE '2017%'
+    AND strftime('%w', timestamp) = ?
+GROUP BY hour, weekday
+ORDER BY avg_demand DESC
 """, lowest_weekday,)
 
 # Fetch and print the data in the table
 cur.execute("SELECT * FROM hour_lowest_demand")
 hour_lowest_demand = cur.fetchall()
 
+print("\nQ7c: Hours and average demand from weekday with lowest demand rate in 2017")
 for row in hour_lowest_demand:
     hour = row[0]
     avg_demand = row[1]
     print(f"Hour: {hour}, Average Demand: {avg_demand}")
 
+# 7d.
+# Nature and frequency (prevalence) of the weather condition in 2017 with reference to its
+# temp_category being cold, mild or hot.
+
 # 7di.
-# Nature and frequency (prevalence) of the weather condition in 2017 with reference to it
-# being cold, mild or hot and also the various weather conditions
+# Considering both the weather condition and temp_category in the grouping
+cur.execute('''
+CREATE TABLE weather_temp_condition AS
+SELECT cb.weather, c.temp_category, COUNT(*) AS count
+FROM CarSharing_backup cb
+JOIN CarSharing c
+ON c.id = cb.id
+WHERE strftime('%Y', c.timestamp) LIKE '2017%'
+GROUP BY cb.weather, c.temp_category
+ORDER BY count DESC
+''')
+
+# Fetch and print the most prevalent weather_condition considering both the
+# weather and temp_category in the table
+cur.execute("SELECT * FROM weather_temp_condition")
+row = cur.fetchall()
+print(f"\nQ7d: \nConsidering both the weather and temp_category of weather condition,\n"
+      f"the most prevalent weather condition is one with \n{row[0]}")
 
 # 7dii.
-# Table for average, highest and lowest wind speed for each month in 2017
+# Considering only the weather condition in the grouping
+cur.execute('''
+CREATE TABLE weather_condition AS
+SELECT cb.weather, c.temp_category, COUNT(*) AS count
+FROM CarSharing_backup cb
+JOIN CarSharing c
+ON c.id = cb.id
+WHERE strftime('%Y', c.timestamp) LIKE '2017%'
+GROUP BY cb.weather
+ORDER BY count DESC
+''')
+
+# Fetch and print the most prevalent weather_condition considering only the weather and
+# temp_category in the table
+cur.execute("SELECT * FROM weather_condition")
+row = cur.fetchall()
+print(f"\nConsidering only the weather component of the weather condition,\n"
+      f"the most prevalent weather condition is one with \n{row[0]}")
 
 # 7diii.
-# Table for average, highest and lowest humidity for each month in 2017
+# Table for average, highest and lowest wind speed for each month in 2017.
+cur.execute("""
+CREATE TABLE windspeed_summary AS
+SELECT strftime('%m', timestamp) AS month, AVG(windspeed) AS avg_windspeed, MAX(windspeed) AS max_windspeed, MIN(windspeed) AS min_windspeed
+FROM CarSharing
+WHERE strftime('%Y', timestamp) LIKE '2017%'
+AND windspeed != ""
+GROUP BY month
+""")
+
+# Fetch and print the data in the table
+cur.execute("SELECT * FROM windspeed_summary")
+windspeed_summary = cur.fetchall()
+
+print("\nQ7d: Average, minimum and maximum summary of windspeed for each month in 2017")
+for row in windspeed_summary:
+    print({row})
 
 # 7div.
+# Table for average, highest and lowest humidity for each month in 2017.
+cur.execute("""
+CREATE TABLE humidity_summary AS
+SELECT strftime('%m', timestamp) AS month, AVG(humidity) AS avg_humidity, MAX(humidity) AS max_humidity, MIN(humidity) AS min_humidity
+FROM CarSharing
+WHERE strftime('%Y', timestamp) LIKE '2017%'
+AND humidity != ""
+GROUP BY month
+""")
+
+# Fetch and print the data in the table
+cur.execute("SELECT * FROM humidity_summary")
+humidity_summary = cur.fetchall()
+
+print("\nQ7d: Average, minimum and maximum summary of humidity for each month in 2017")
+for row in humidity_summary:
+    print({row})
+
+# 7dv.
 # Create table showing the average demand rate for each cold, mild and hot weather in 2017
-# sorted in descending order based on their average demand rates
+# sorted in descending order based on their average demand rates.
+cur.execute("""
+CREATE TABLE temp_category_demand AS
+SELECT temp_category, AVG(demand) AS avg_demand
+FROM CarSharing
+WHERE strftime('%Y', timestamp) LIKE '2017%'
+GROUP BY temp_category
+ORDER BY avg_demand DESC
+""")
+
+# Fetch and print the data in the table
+cur.execute("SELECT * FROM temp_category_demand")
+temp_category_demand = cur.fetchall()
+
+print("\nQ7d: Average demand rate for each cold, mild and hot weather in 2017")
+for row in temp_category_demand:
+    print({row})
 
 # 7e.
 # Create table showing the information in 7d for the month with the highest average demand rate
 # in 2017 and compare it with other months
+
+# 7ei.
+# Create the table to show the information summary for all the months in year 2017.
+cur.execute("""
+CREATE TABLE info_summary_demand2017 AS
+SELECT c.temp_category, cb.weather, cb.humidity, cb.windspeed, AVG(c.demand) AS avg_demand, 
+    CASE strftime('%m', c.timestamp)
+        WHEN '01' THEN 'January'
+        WHEN '02' THEN 'February'
+        WHEN '03' THEN 'March'
+        WHEN '04' THEN 'April'
+        WHEN '05' THEN 'May'
+        WHEN '06' THEN 'June'
+        WHEN '07' THEN 'July'
+        WHEN '08' THEN 'August'
+        WHEN '09' THEN 'September'
+        WHEN '10' THEN 'October'
+        WHEN '11' THEN 'November'
+        WHEN '12' THEN 'December'
+    END AS month
+FROM CarSharing_backup cb
+JOIN CarSharing c
+ON c.id = cb.id
+WHERE strftime('%Y', c.timestamp) LIKE '2017%'
+GROUP BY month
+ORDER BY avg_demand DESC
+""")
+
+# Firstly, fetch the month of the highest demand rate throughout 2017.
+cur.execute("SELECT month FROM highest_demand2017")
+highest_month = cur.fetchone()
+print("\nQ7e: Month with highest demand rate in 2017 ")
+for row in highest_month:
+    print(row)
+
+# Fetch the table to show the information summary for all the months in year 2017 for comparison.
+cur.execute("SELECT * FROM info_summary_demand2017 WHERE month = ?", highest_month,)
+highest_month_summary_demand2017 = cur.fetchall()
+print("\nQ7e: Information summary for the month with highest demand in year 2017.")
+for row in highest_month_summary_demand2017:
+    print(row)
+
+# Fetch the table to show the information summary for all the months in year 2017 for comparison.
+cur.execute("SELECT * FROM info_summary_demand2017")
+info_summary_demand2017 = cur.fetchall()
+print("\nQ7e: Information summary for all the months in year 2017.")
+for row in info_summary_demand2017:
+    print(row)
