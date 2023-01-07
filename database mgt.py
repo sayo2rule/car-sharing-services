@@ -23,7 +23,7 @@ CREATE TABLE CarSharing (
     temp_feel REAL, 
     humidity REAL, 
     windspeed REAL, 
-    demand REAL)
+    demand REAL);
 ''')
 
 # Open the csv file and perform some preprocessing techniques on the csv file.
@@ -38,11 +38,22 @@ with open("/Users/user/Documents/Keele AI & DS/CSC-40054 (Data Analytics and Dat
     # iterate over the rows.
     for row in reader:
         # insert data into the table CarSharing.
-        cur.execute("INSERT INTO CarSharing VALUES (?,?,?,?,?,?,?,?,?,?,?)", row)
+        cur.execute("INSERT INTO CarSharing VALUES (?,?,?,?,?,?,?,?,?,?,?);", row)
 
 # Fetch and print the data in the table
 print("\nQ1: CarSharing table (top 5 rows)")
-cur.execute("SELECT * FROM CarSharing LIMIT 5")
+
+# Get column names
+cur.execute("PRAGMA table_info(CarSharing);")
+columns = cur.fetchall()
+
+# Get the second element of each tuple, which is the column name
+column_names = [column[1] for column in columns]
+
+# Print column names
+print(", ".join(column_names))  # Join the column names with a 'comma with a space' separator
+
+cur.execute("SELECT * FROM CarSharing LIMIT 5;")
 CarSharing = cur.fetchall()
 
 for row in CarSharing:
@@ -54,12 +65,23 @@ for row in CarSharing:
 cur.execute('''
 CREATE TABLE CarSharing_backup AS 
 SELECT * 
-FROM CarSharing
+FROM CarSharing;
 ''')
 
 # Fetch and print the data in the table
 print("\nQ1: CarSharing back-up table (top 5 rows)")
-cur.execute("SELECT * FROM CarSharing_backup LIMIT 5")
+
+# Get column names
+cur.execute("PRAGMA table_info(CarSharing_backup);")
+columns = cur.fetchall()
+
+# Get the second element of each tuple, which is the column name
+column_names = [column[1] for column in columns]
+
+# Print column names
+print(", ".join(column_names))  # Join the column names with a 'comma with a space' separator
+
+cur.execute("SELECT * FROM CarSharing_backup LIMIT 5;")
 CarSharing_backup = cur.fetchall()
 
 for row in CarSharing_backup:
@@ -67,7 +89,7 @@ for row in CarSharing_backup:
 
 # 2a.
 # Add a column to the CarSharing table named "temp_category".
-cur.execute("ALTER TABLE CarSharing ADD COLUMN temp_category TEXT(3)")
+cur.execute("ALTER TABLE CarSharing ADD COLUMN temp_category TEXT(3);")
 
 # 2b.
 # Update the values in the temp_category.
@@ -79,12 +101,23 @@ cur.execute('''
             WHEN temp_feel BETWEEN 10 AND 25 THEN 'Mild'
             ELSE 'Hot'
         END
-    )
+    );
 ''')
 
 # Fetch and print the data in the table
 print("\nQ2: CarSharing updated table (top 5 rows)")
-cur.execute("SELECT * FROM CarSharing LIMIT 5")
+
+# Get column names
+cur.execute("PRAGMA table_info(CarSharing);")
+columns = cur.fetchall()
+
+# Get the second element of each tuple, which is the column name
+column_names = [column[1] for column in columns]
+
+# Print column names
+print(", ".join(column_names))  # Join the column names with a 'comma with a space' separator
+
+cur.execute("SELECT * FROM CarSharing LIMIT 5;")
 CarSharing = cur.fetchall()
 
 for row in CarSharing:
@@ -98,7 +131,7 @@ cur.execute('''
         temp REAL,
         temp_feel REAL,
         temp_category TEXT
-    )
+    );
 ''')
 
 # Select the temp, temp_feel, and temp_category columns from the CarSharing table and insert them
@@ -106,12 +139,23 @@ cur.execute('''
 cur.execute('''
     INSERT INTO temperature (temp, temp_feel, temp_category)
     SELECT temp, temp_feel, temp_category
-    FROM CarSharing
+    FROM CarSharing;
 ''')
 
 # Fetch and print the data in the table
 print("\nQ3: Temperature table (top 5 rows)")
-cur.execute("SELECT * FROM temperature LIMIT 5")
+
+# Get column names
+cur.execute("PRAGMA table_info(temperature);")
+columns = cur.fetchall()
+
+# Get the second element of each tuple, which is the column name
+column_names = [column[1] for column in columns]
+
+# Print column names
+print(", ".join(column_names))  # Join the column names with a 'comma with a space' separator
+
+cur.execute("SELECT * FROM temperature LIMIT 5;")
 temperature = cur.fetchall()
 
 for row in temperature:
@@ -133,16 +177,28 @@ COMMIT;
 ''')
 
 # Fetch and print the data in the table
-print("\nQ3: Temperature table altered (top 5 rows)")
-cur.execute("SELECT * FROM temperature LIMIT 5")
-temperature = cur.fetchall()
+print("\nQ3: Altered CarSharing table (top 5 rows)")
 
-for row in temperature:
+# Get column names
+cur.execute("PRAGMA table_info(CarSharing);")
+columns = cur.fetchall()
+
+# Get the second element of each tuple, which is the column name
+column_names = [column[1] for column in columns]
+
+# Print column names
+print(", ".join(column_names))  # Join the column names with a 'comma with a space' separator
+
+# Print the first 5 rows of the table
+cur.execute("SELECT * FROM CarSharing LIMIT 5;")
+CarSharing = cur.fetchall()
+
+for row in CarSharing:
     print({row})
 
 # 4a.
 # Find the distinct values of the weather column
-cur.execute("SELECT DISTINCT weather FROM CarSharing")
+cur.execute("SELECT DISTINCT weather FROM CarSharing;")
 
 # Fetch the result.
 distinct_weather = cur.fetchall()
@@ -160,9 +216,7 @@ for i, weather in enumerate(distinct_weather):
 
 # 4c.
 # Add the weather_code column to the CarSharing table
-cur.execute('''
-ALTER TABLE CarSharing ADD COLUMN weather_code INTEGER;
-''')
+cur.execute("ALTER TABLE CarSharing ADD COLUMN weather_code INTEGER;")
 
 # Update the weather_code column based on the weather column
 for weather, code in weather_code.items():
@@ -172,15 +226,21 @@ for weather, code in weather_code.items():
     WHERE weather = ?;
     ''', (code, weather))
 
-# Query the top 5 rows from the CarSharing table.
-cur.execute('''
-SELECT * 
-FROM CarSharing 
-LIMIT 5;
-''')
-
 # Fetch and print the data
 print("\nQ4: CarSharing table updated with weather_code")
+
+# Get column names
+cur.execute("PRAGMA table_info(CarSharing);")
+columns = cur.fetchall()
+
+# Get the second element of each tuple, which is the column name
+column_names = [column[1] for column in columns]
+
+# Print column names
+print(", ".join(column_names))  # Join the column names with a 'comma with a space' separator
+
+# Print the first 5 rows
+cur.execute("SELECT * FROM CarSharing LIMIT 5;")
 rows = cur.fetchall()
 for row in rows:
     print(row)
@@ -200,20 +260,20 @@ cur.execute('''
 CREATE TABLE weather(
 weather TEXT,
 weather_code INTEGER
-)''')
+);''')
 
 # 5b.
 # Copy the weather and weather_code's data from the CarSharing table into the table weather
 cur.execute('''
 INSERT INTO weather (weather, weather_code)
 SELECT weather, weather_code 
-FROM CarSharing
+FROM CarSharing;
 ''')
 
 # 5c. Drop the weather column from the CarSharing table
 cur.execute('''
 ALTER TABLE CarSharing 
-DROP COLUMN weather
+DROP COLUMN weather;
 ''')
 
 # Query the column information for the CarSharing table to confirm if the column "weather" has been dropped
@@ -267,16 +327,22 @@ SELECT
 FROM CarSharing; 
 ''')
 
-# Query the top 5 rows from the "time" table to have an idea of how the table looks like.
-cur.execute('''
-SELECT * 
-FROM time 
-LIMIT 5;
-''')
-
 # Fetch and print the data.
+print("\nQ6: Table named 'time' with the columns; timestamp, hour, weekday and month.")
+
+# Get column names.
+cur.execute("PRAGMA table_info(time);")
+columns = cur.fetchall()
+
+# Get the second element of each tuple, which is the column name.
+column_names = [column[1] for column in columns]
+
+# Print column names.
+print(", ".join(column_names))  # Join the column names with a 'comma with a space' separator.
+
+# Query and print the first 5 rows of the table.
+cur.execute("SELECT * FROM time LIMIT 5;")
 rows = cur.fetchall()
-print("\nQ6: 'time' table with the four columns; timestamp, hour, weekday and month ")
 for row in rows:
     print(row)
 
